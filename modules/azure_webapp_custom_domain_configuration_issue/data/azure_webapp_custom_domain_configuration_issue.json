@@ -1,0 +1,130 @@
+{
+  "name": "azure_webapp_custom_domain_configuration_issue",
+  "description": "This incident type refers to an issue with custom domain configuration for an Azure WebApp, where the custom domain (e.g., www.yourdomain.com) is not working with the web app. The incident requires investigation of DNS settings, validation of correct mapping to App Service, and configuration of SSL bindings if needed to resolve the issue.",
+  "params": [
+    {
+      "name": "ZONE_NAME",
+      "value": ""
+    },
+    {
+      "name": "WEBAPP_NAME",
+      "value": ""
+    },
+    {
+      "name": "YOURDOMAIN",
+      "value": ""
+    },
+    {
+      "name": "CERTIFICATE_NAME",
+      "value": ""
+    },
+    {
+      "name": "RESOURCE_GROUP_NAME",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Azure WebApp Custom Domain Configuration Issue\nThis incident type refers to an issue with custom domain configuration for an Azure WebApp, where the custom domain (e.g., www.yourdomain.com) is not working with the web app. The incident requires investigation of DNS settings, validation of correct mapping to App Service, and configuration of SSL bindings if needed to resolve the issue."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the WebApp's custom domain settings"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `az webapp config hostname list --resource-group ${RESOURCE_GROUP_NAME} --webapp-name ${WEBAPP_NAME}`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the WebApp's SSL bindings"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `az webapp config ssl list --resource-group ${RESOURCE_GROUP_NAME}`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify the SSL certificate config details"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `az webapp config ssl show --resource-group ${RESOURCE_GROUP_NAME} --certificate-name ${CERTIFICATE_NAME}`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Get the list of name servers for your zone"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `az network dns record-set ns show --resource-group ${RESOURCE_GROUP_NAME} --zone-name ${ZONE_NAME} --name @`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the DNS validation record settings for the custom domain"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `az network dns record-set txt show --resource-group ${RESOURCE_GROUP_NAME} --zone-name ${ZONE_NAME} --name @`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the mapping of the custom domain to the WebApp's IP address"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `az network dns record-set a show --resource-group ${RESOURCE_GROUP_NAME} --zone-name ${ZONE_NAME} --name @`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check and update the DNS settings to ensure that the custom domain is correctly mapped to the web app's IP address."
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_dns_mapping($ZONE_NAME, $WEBAPP_NAME, $YOURDOMAIN, $RESOURCE_GROUP_NAME)"
+    }
+  ]
+}
